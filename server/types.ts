@@ -1,9 +1,10 @@
 import * as v from 'valibot'
 
-export enum Status {
+export enum StreamStatus {
   Idle = 'idle',
   Loading = 'loading',
   Connected = 'connected',
+  Error = 'error',
 }
 
 export enum PayloadKind {
@@ -16,7 +17,7 @@ export enum PayloadKind {
 
 export const dataPayload = v.object({ kind: v.enum(PayloadKind), data: v.any() })
 
-export const microBlockSchema = v.object({
+export const microBlockStreamSchema = v.object({
   type: v.literal('micro'),
   hash: v.string(),
   blockNumber: v.number(),
@@ -29,8 +30,7 @@ export const microBlockSchema = v.object({
   isSkip: v.optional(v.boolean()),
 })
 
-export const macroBlockSchema = v.object({
-
+export const macroBlockStreamSchema = v.object({
   type: v.literal('macro'),
   hash: v.string(),
   blockNumber: v.number(),
@@ -42,4 +42,13 @@ export const macroBlockSchema = v.object({
   unmatchedTxs: v.array(v.string()),
 })
 
-export type Block = v.InferInput<typeof microBlockSchema> | v.InferInput<typeof macroBlockSchema>
+export type MicroBlockStream = v.InferInput<typeof microBlockStreamSchema>
+export type MacroBlockStream = v.InferInput<typeof macroBlockStreamSchema>
+export type BlockStream = MicroBlockStream | MacroBlockStream
+export interface PlaceHolderBlock { type: 'placeholder', blockNumber: number }
+export interface SkipBlock { type: 'skip', blockNumber: number } // Implement in the code
+export type Block =
+  | (MicroBlockStream & { delay: number, color: string })
+  | (MacroBlockStream & { delay: number })
+  | PlaceHolderBlock
+  | SkipBlock

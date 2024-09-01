@@ -62,6 +62,8 @@ export default defineNuxtConfig({
     },
   },
 
+  watch: ['server/**/*'],
+
   nitro: {
     esbuild: {
       options: {
