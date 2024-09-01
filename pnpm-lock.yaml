@@ -14,6 +14,12 @@ importers:
       '@nimiq/core':
         specifier: next
         version: 2.0.0-next.24.0
+      nimiq-rpc-client-ts:
+        specifier: ^0.4.0
+        version: 0.4.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      valibot:
+        specifier: ^0.40.0
+        version: 0.40.0(typescript@5.5.4)
     devDependencies:
       '@antfu/eslint-config':
         specifier: ^3.0.0
@@ -3709,6 +3715,9 @@ packages:
       unocss: ^0.58.5
       vite: ^2.9.0 || ^3.0.0-0 || ^4.0.0 || ^5.0.0-0
 
+  nimiq-rpc-client-ts@0.4.0:
+    resolution: {integrity: sha512-Syz4b3PrYEekQfcpmeFqN2ChNG2yV40hg8nMKRpb5LXrKj37YgRSpm6zjL7IStxfHCEcn5aQPw0U14DOh/jFvA==}
+
   nitro-cloudflare-dev@0.1.6:
     resolution: {integrity: sha512-7YcLTJsTZSZZ89XrTEaDEnFsVWbppBgLO0Rr5n3Nf93gKHTBkBfeGH8//8FVwV2poi6SabVbJ0a2eoJRoII81w==}
 
@@ -4925,6 +4934,14 @@ packages:
   uuid@10.0.0:
     resolution: {integrity: sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==}
     hasBin: true
+
+  valibot@0.40.0:
+    resolution: {integrity: sha512-XHKnaVtwHqxPwnGOsLrwka9CEaL7yNeLNp707OKv/bmT29GnPVdl6PxBOZ6BW7hF66/6QT6iVbOlnW7qVPmoKw==}
+    peerDependencies:
+      typescript: '>=5'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
 
   validate-npm-package-license@3.0.4:
     resolution: {integrity: sha512-DpKm2Ui/xN7/HQKCtpZxoRWBhZ9Z0kqtygG8XCgNQ8ZlDnxuQmWhj566j8fN4Cu3/JmbhsDo7fcAJq4s9h27Ew==}
@@ -9345,6 +9362,13 @@ snapshots:
       unocss: 0.62.3(@unocss/webpack@0.62.3(rollup@4.21.2)(webpack@5.94.0(esbuild@0.17.19)))(postcss@8.4.42)(rollup@4.21.2)(vite@5.4.2(@types/node@22.5.1)(terser@5.31.6))
       vite: 5.4.2(@types/node@22.5.1)(terser@5.31.6)
 
+  nimiq-rpc-client-ts@0.4.0(bufferutil@4.0.8)(utf-8-validate@5.0.10):
+    dependencies:
+      ws: 8.18.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
   nitro-cloudflare-dev@0.1.6:
     dependencies:
       consola: 3.2.3
@@ -10808,6 +10832,10 @@ snapshots:
   util-deprecate@1.0.2: {}
 
   uuid@10.0.0: {}
+
+  valibot@0.40.0(typescript@5.5.4):
+    optionalDependencies:
+      typescript: 5.5.4
 
   validate-npm-package-license@3.0.4:
     dependencies:

@@ -13,7 +13,9 @@
     "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
-    "@nimiq/core": "next"
+    "@nimiq/core": "next",
+    "nimiq-rpc-client-ts": "^0.4.0",
+    "valibot": "^0.40.0"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^3.0.0",

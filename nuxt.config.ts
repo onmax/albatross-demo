@@ -1,3 +1,4 @@
+import process from 'node:process'
 import wasm from 'vite-plugin-wasm'
 import topLevelAwait from 'vite-plugin-top-level-await'
 
@@ -9,7 +10,6 @@ export default defineNuxtConfig({
 
   compatibilityDate: '2024-08-31',
 
-  ssr: false,
   modules: [
     '@vueuse/nuxt',
     '@pinia/nuxt',
@@ -30,6 +30,18 @@ export default defineNuxtConfig({
 
   colorMode: {
     classSuffix: '',
+  },
+
+  runtimeConfig: {
+    rpcUrl: process.env.NUXT_RPC_URL || '',
+    streamUrl: process.env.NUXT_STREAM_URL || '',
+    public: {
+      nimiqNetwork: process.env.NUXT_PUBLIC_NIMIQ_NETWORK || '',
+    },
+  },
+
+  routeRules: {
+    '/api/policy': { swr: 3600 }, // cache 1 hour
   },
 
   experimental: {
