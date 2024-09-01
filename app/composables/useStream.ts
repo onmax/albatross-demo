@@ -17,15 +17,20 @@ export function useStream() {
 
     eventSource.onmessage = (event) => {
       const block = JSON.parse(event.data)
-      if (blocks.value.some(b => b.type === 'macro'))
-        return
-      blocks.value = [...blocks.value, block].slice(-30)
+      blocks.value = [...blocks.value, block].slice(-90)
     }
   }
+
+  const latestBlock = computed(() => blocks.value.at(-1))
+  const latestMicroBlock = computed(() => blocks.value.filter(b => b.type === 'micro').at(-1))
+  const blockNumber = computed(() => latestBlock.value?.blockNumber || 0)
+  const batchNumber = computed(() => latestMicroBlock.value?.batchNumber || 0)
 
   return {
     status,
     subscribe,
     blocks,
+    blockNumber,
+    batchNumber,
   }
 }
