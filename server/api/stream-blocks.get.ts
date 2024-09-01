@@ -1,12 +1,11 @@
 import * as v from 'valibot'
 import { colors } from '~/composables/useColors'
-import type { Block, BlockStream, MacroBlockStream, MicroBlockStream, PlaceHolderBlock } from '~~/server/types'
+import type { BlockStream, MacroBlockStream, MicroBlockStream, PlaceHolderBlock } from '~~/server/types'
 import { PayloadKind, dataPayload, macroBlockStreamSchema, microBlockStreamSchema } from '~~/server/types'
 
 let ws: WebSocket
 const validators = new Set<string>()
-const blockNumber = 0
-const blocks: Block[] = []
+let blockNumber = 0
 let latestBlock: BlockStream | PlaceHolderBlock | undefined
 let placeHolderID = -1
 let lastBlockTime: number | undefined
@@ -33,12 +32,20 @@ export default defineEventHandler(async (event) => {
           case PayloadKind.NewBlock: {
             const { success: isMicro, output: parsedMicro } = v.safeParse(microBlockStreamSchema, output.data)
             if (isMicro) {
-              await eventStream.push(`${JSON.stringify(handleMicroBlock(parsedMicro))}\n`)
+              const microBlock = handleMicroBlock(parsedMicro)
+              const skipBlock = handleSkipBlock(microBlock)
+              if (skipBlock)
+                await eventStream.push(`${JSON.stringify(skipBlock)}\n`)
+              await eventStream.push(`${JSON.stringify(parsedMicro)}\n`)
               return
             }
             const { success: isMacro, output: parsedMacro } = v.safeParse(macroBlockStreamSchema, output.data)
             if (isMacro) {
-              await eventStream.push(`${JSON.stringify(handleMacroBlock(parsedMacro))}\n`)
+              const macroBlock = handleMacroBlock(parsedMacro)
+              const skipBlock = handleSkipBlock(macroBlock)
+              if (skipBlock)
+                await eventStream.push(`${JSON.stringify(skipBlock)}\n`)
+              await eventStream.push(`${JSON.stringify(parsedMacro)}\n`)
             }
             break
           }
@@ -59,15 +66,18 @@ function handleMicroBlock(microBlock: MicroBlockStream) {
   validators.add(microBlock.producer.publicKey)
   const color = colors[validators.size % colors.length]
   const block = { ...microBlock, color, delay: getDelay(microBlock) }
+  blockNumber = block.blockNumber
   return block
 }
 
 function handleMacroBlock(macroBlock: MacroBlockStream) {
   validators.clear()
-  return { ...macroBlock, color: colors[0], delay: getDelay(macroBlock) }
+  const block = { ...macroBlock, color: colors[0], delay: getDelay(macroBlock) }
+  blockNumber = block.blockNumber
+  return block
 }
 
-function getDelay(block: BlockStream) {
+function handleSkipBlock(block: MicroBlockStream | MacroBlockStream) {
   // Ignore out-of-order blocks, but allow network resets
   if (block.blockNumber < blockNumber && block.blockNumber > (blockNumber - 10))
     return
@@ -78,13 +88,13 @@ function getDelay(block: BlockStream) {
     const isLatestPlaceholder = latestBlock && latestBlock.type === 'placeholder'
     if (!isLatestPlaceholder) {
       // Add a placeholder for the skipped block
-      blocks.push({ type: 'placeholder', blockNumber: placeHolderID-- })
+      return { type: 'placeholder', blockNumber: placeHolderID-- }
     }
-    // Reset delay
     lastBlockTime = undefined
   }
+}
 
-  // Calculate block delay
+function getDelay(block: BlockStream) {
   const delay = lastBlockTime ? block.timestamp - lastBlockTime : 0
   lastBlockTime = block.timestamp
   latestBlock = block

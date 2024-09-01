@@ -45,10 +45,8 @@ export const macroBlockStreamSchema = v.object({
 export type MicroBlockStream = v.InferInput<typeof microBlockStreamSchema>
 export type MacroBlockStream = v.InferInput<typeof macroBlockStreamSchema>
 export type BlockStream = MicroBlockStream | MacroBlockStream
+
+export type MicroBlock = MicroBlockStream & { delay: number, color: string }
+export type MacroBlock = MacroBlockStream & { delay: number, color: string }
 export interface PlaceHolderBlock { type: 'placeholder', blockNumber: number }
-export interface SkipBlock { type: 'skip', blockNumber: number } // Implement in the code
-export type Block =
-  | (MicroBlockStream & { delay: number, color: string })
-  | (MacroBlockStream & { delay: number })
-  | PlaceHolderBlock
-  | SkipBlock
+export type Block = MicroBlock | MacroBlock | PlaceHolderBlock

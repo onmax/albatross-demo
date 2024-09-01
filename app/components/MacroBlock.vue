@@ -1,19 +1,21 @@
 <script setup lang="ts">
-import type { Block } from '~~/server/types'
+import type { MacroBlock } from '~~/server/types'
 
 // import RadialProgress from '../RadialProgress.vue';
 
-const props = defineProps<{ block: Block, slots: number }>()
+const props = defineProps<{ block: MacroBlock, slots: number }>()
 
 const requiredVotes = computed(() => Math.ceil(props.slots * 2 / 3))
-const progress = computed(() => Math.min(props.block.votes / requiredVotes.value, 1))
+const progress = computed(() => Math.min(props.block.justification.votes / requiredVotes.value, 1))
 </script>
 
 <template>
-  <div class="nq-green-bg block" :class="{ accepted: progress === 1 }" title="Macro Block">
-    <header>Macro Block</header>
+  <div :class="{ accepted: progress === 1 }" title="Macro Block" flex="~ col justify-between items-center shrink-0" text="14 neutral center" relative my--24 h-208 w-160 rounded-8 bg-green transition-300>
+    <header text-11 font-bold lh-24 uppercase tracking="0.1em">
+      Macro Block
+    </header>
 
-    <div class="block-number">
+    <div text-24 font-bold lh-none>
       M{{ block.batchNumber }}
     </div>
 
@@ -22,9 +24,9 @@ const progress = computed(() => Math.min(props.block.votes / requiredVotes.value
       :inner-stroke-width="2"
     />
 
-    <div class="votes">
+    <div mb-16 text-24>
       {{ block.justification.votes }} / {{ slots }}
-      <div class="votes-description">
+      <div text-12 lh-none>
         Votes
       </div>
     </div>
@@ -32,49 +34,8 @@ const progress = computed(() => Math.min(props.block.votes / requiredVotes.value
 </template>
 
 <style scoped>
-.block {
-  display: flex;
-  flex-shrink: 0;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  text-align: center;
-  transition: 0.3s;
-  border-radius: 1rem;
-  width: 20rem;
-  height: 26rem;
-  font-size: 1.675rem;
-  margin-top: -3rem;
-  margin-bottom: -3rem;
-}
-
-header {
-  height: 3rem;
-  line-height: 3rem;
-  font-size: 1.375rem;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-.block-number {
-  font-size: 3rem;
-  font-weight: bold;
-  line-height: 1;
-}
-
-.block.accepted >>> .progress-circle {
-  transition: opacity 0.6s var(--nimiq-ease) 0.4s;
+.accepted :::v-deep .progress-circle {
+  transition: opacity 0.6s var(--nq-ease) 0.4s;
   opacity: 0;
-}
-
-.votes {
-  font-size: 3rem;
-  margin-bottom: 2rem;
-}
-
-.votes-description {
-  font-size: 1.5rem;
-  line-height: 1;
 }
 </style>

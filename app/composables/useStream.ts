@@ -17,6 +17,8 @@ export function useStream() {
 
     eventSource.onmessage = (event) => {
       const block = JSON.parse(event.data)
+      if (blocks.value.some(b => b.type === 'macro'))
+        return
       blocks.value = [...blocks.value, block].slice(-30)
     }
   }
