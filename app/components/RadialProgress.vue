@@ -32,7 +32,7 @@ const ringStyle = computed(() => `stroke-dashoffset: ${circumference.value - pro
       <span v-if="progress < 1">
         {{ Math.round(100 * progress) }}%
       </span>
-      <div v-else i-nimiq:check-thin text="neutral 24" />
+      <div v-else i-nimiq:check-thin text-24 />
     </div>
   </div>
 </template>

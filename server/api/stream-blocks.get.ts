@@ -3,7 +3,6 @@ import { colors } from '~/composables/useColors'
 import type { BlockStream, MacroBlockStream, MicroBlockStream, PlaceHolderBlock } from '~~/server/types'
 import { PayloadKind, dataPayload, macroBlockStreamSchema, microBlockStreamSchema } from '~~/server/types'
 
-let ws: WebSocket
 const validators = new Set<string>()
 let blockNumber = 0
 let latestBlock: BlockStream | PlaceHolderBlock | undefined
@@ -12,8 +11,7 @@ let lastBlockTime: number | undefined
 
 export default defineEventHandler(async (event) => {
   try {
-    if (!ws)
-      ws = new WebSocket(useRuntimeConfig().streamUrl)
+    const ws = new WebSocket(useRuntimeConfig().streamUrl)
 
     const eventStream = createEventStream(event)
 
@@ -47,6 +45,10 @@ export default defineEventHandler(async (event) => {
                 await eventStream.push(`${JSON.stringify(skipBlock)}\n`)
               await eventStream.push(`${JSON.stringify(parsedMacro)}\n`)
             }
+            break
+          }
+          case PayloadKind.CacheComplete: {
+            await eventStream.push(`${JSON.stringify({ type: 'cacheComplete' })}\n`)
             break
           }
         }

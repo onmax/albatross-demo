@@ -30,24 +30,26 @@ const fontSizeClass = computed(() => {
 </script>
 
 <template>
-  <div title="Micro Block" flex="~ col shrink-0" relative size-160 rounded-8 bg-neutral text="14 neutral-0">
-    <div px-16 pb-10 pt-14 flex="~ items-center">
-      <div font-bold :class="fontSizeClass">
-        #{{ block.blockNumber }}
+  <div title="Micro Block">
+    <div flex="~ col shrink-0" relative size-160 rounded-8 bg-neutral text-neutral-0>
+      <div px-16 pb-10 pt-14 flex="~ items-center justify-between" text-15>
+        <p font-bold :class="fontSizeClass">
+          #{{ block.blockNumber }}
+        </p>
+        <p v-if="txCount > 0" text-13 font-semibold lh-none>
+          {{ txCount }} TX
+        </p>
       </div>
-      <div v-if="txCount" font-semibold lh-none>
-        {{ txCount }} TX
+
+      <div v-if="!txCount" text="neutral-700 13 center" mt-80 grow-1 font-semibold>
+        No Transactions
+      </div>
+      <div v-else grow-1>
+        <TransactionCanvas absolute bottom-0 left-0 origin="[0_100%]" scale-50 :nonces :hashes />
       </div>
     </div>
 
-    <div v-if="!txCount" text="neutral-700 13 center" mt-80 grow-1 font-semibold>
-      No Transactions
-    </div>
-    <div v-else flex-1>
-      <TransactionCanvas absolute bottom-0 left-0 origin-bottom scale-50 :nonces="nonces" :hashes="hashes" />
-    </div>
-
-    <footer flex="~ items-center justify-between" mb--24 w-full px-8 pt-2 text="neutral-800 12">
+    <footer flex="~ items-center justify-between" w-full px-8 pt-2 text="neutral-800 12">
       <p>
         Slot {{ block.producer.index }}
       </p>

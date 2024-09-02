@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import type { MacroBlock } from '~~/server/types'
 
-// import RadialProgress from '../RadialProgress.vue';
-
 const props = defineProps<{ block: MacroBlock, slots: number }>()
 
 const requiredVotes = computed(() => Math.ceil(props.slots * 2 / 3))
@@ -10,7 +8,7 @@ const progress = computed(() => Math.min(props.block.justification.votes / requi
 </script>
 
 <template>
-  <div :class="{ accepted: progress === 1 }" title="Macro Block" flex="~ col justify-between items-center shrink-0" text="14 neutral center" relative my--24 h-208 w-160 rounded-8 bg-green transition-300>
+  <div :class="{ accepted: progress === 1 }" title="Macro Block" flex="~ col justify-between items-center shrink-0" text="14 white center" relative my--24 h-208 w-160 rounded-8 bg-green transition-300>
     <header text-11 font-bold lh-24 uppercase tracking="0.1em">
       Macro Block
     </header>
@@ -34,7 +32,7 @@ const progress = computed(() => Math.min(props.block.justification.votes / requi
 </template>
 
 <style scoped>
-.accepted :::v-deep .progress-circle {
+.accepted :deep(.progress-circle) {
   transition: opacity 0.6s var(--nq-ease) 0.4s;
   opacity: 0;
 }

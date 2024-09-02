@@ -1,12 +1,5 @@
 import * as v from 'valibot'
 
-export enum StreamStatus {
-  Idle = 'idle',
-  Loading = 'loading',
-  Connected = 'connected',
-  Error = 'error',
-}
-
 export enum PayloadKind {
   NewBlock = 'newBlock',
   Policy = 'policy',

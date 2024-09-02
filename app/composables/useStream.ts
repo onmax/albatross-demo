@@ -1,23 +1,36 @@
-import { type Block, StreamStatus } from '~~/server/types'
+import type { Block } from '~~/server/types'
+
+export enum StreamStatus {
+  Idle = 'idle',
+  Loading = 'loading',
+  Syncing = 'syncing',
+  Connected = 'connected',
+  Error = 'error',
+}
 
 export function useStream() {
   const status = ref(StreamStatus.Idle)
   const blocks = ref<Block[]>([])
 
   async function subscribe() {
+    if (import.meta.server)
+      return
+
     const eventSource = new EventSource('/api/stream-blocks')
 
     status.value = StreamStatus.Loading
-    eventSource.addEventListener('open', () => {
-      status.value = StreamStatus.Connected
-    })
-    eventSource.addEventListener('error', () => {
-      status.value = StreamStatus.Error
-    })
+    eventSource.addEventListener('open', () => status.value = StreamStatus.Syncing)
+    eventSource.addEventListener('error', () => status.value = StreamStatus.Error)
 
     eventSource.onmessage = (event) => {
-      const block = JSON.parse(event.data)
-      blocks.value = [...blocks.value, block].slice(-90)
+      const json = JSON.parse(event.data)
+      if (json.type === 'cacheComplete') {
+        status.value = StreamStatus.Connected
+      }
+      else {
+        // if (blocks.value.length < 10)
+        blocks.value = [...blocks.value, json].slice(-100)
+      }
     }
   }
 
