@@ -5,7 +5,7 @@ const { throughput, txLimit, blockTime } = storeToRefs(useStream())
 </script>
 
 <template>
-  <ul flex="~ items-center justify-between gap-32">
+  <ul flex="~ items-center justify-between gap-32 col md:row">
     <li>
       <div text="24/none neutral">
         <TweenedNumber :value="throughput" :decimals="1" :animation-duration="500" />

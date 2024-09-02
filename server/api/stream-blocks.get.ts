@@ -96,6 +96,7 @@ function handleSkipBlock(block: MicroBlockStream | MacroBlockStream) {
     const isLatestPlaceholder = latestBlock && latestBlock.type === 'placeholder'
     if (!isLatestPlaceholder) {
       // Add a placeholder for the skipped block
+      lastBlockTime = block.timestamp
       return { type: 'placeholder', blockNumber: placeHolderID-- }
     }
     lastBlockTime = undefined
