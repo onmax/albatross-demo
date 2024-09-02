@@ -1,7 +1,7 @@
 import * as v from 'valibot'
 import { colors } from '~/composables/useColors'
 import type { BlockStream, MacroBlockStream, MicroBlockStream, PlaceHolderBlock } from '~~/server/types'
-import { PayloadKind, dataPayload, macroBlockStreamSchema, microBlockStreamSchema } from '~~/server/types'
+import { PayloadKind, dataPayload, macroBlockStreamSchema, microBlockStreamSchema, statsStreamSchema } from '~~/server/types'
 
 const validators = new Set<string>()
 let blockNumber = 0
@@ -33,8 +33,8 @@ export default defineEventHandler(async (event) => {
               const microBlock = handleMicroBlock(parsedMicro)
               const skipBlock = handleSkipBlock(microBlock)
               if (skipBlock)
-                await eventStream.push(`${JSON.stringify(skipBlock)}\n`)
-              await eventStream.push(`${JSON.stringify(microBlock)}\n`)
+                await eventStream.push(`${JSON.stringify({ kind: PayloadKind.NewBlock, data: skipBlock })}\n`)
+              await eventStream.push(`${JSON.stringify({ kind: PayloadKind.NewBlock, data: microBlock })}\n`)
               return
             }
             const { success: isMacro, output: parsedMacro } = v.safeParse(macroBlockStreamSchema, output.data)
@@ -42,14 +42,20 @@ export default defineEventHandler(async (event) => {
               const macroBlock = handleMacroBlock(parsedMacro)
               const skipBlock = handleSkipBlock(macroBlock)
               if (skipBlock)
-                await eventStream.push(`${JSON.stringify(skipBlock)}\n`)
-              await eventStream.push(`${JSON.stringify(macroBlock)}\n`)
+                await eventStream.push(`${JSON.stringify({ kind: PayloadKind.NewBlock, data: skipBlock })}\n`)
+              await eventStream.push(`${JSON.stringify({ kind: PayloadKind.NewBlock, data: macroBlock })}\n`)
             }
             break
           }
           case PayloadKind.CacheComplete: {
-            await eventStream.push(`${JSON.stringify({ type: 'cacheComplete' })}\n`)
+            await eventStream.push(`${JSON.stringify({ kind: PayloadKind.CacheComplete })}\n`)
             break
+          }
+          case PayloadKind.Stats: {
+            const { success, output: stats } = v.safeParse(statsStreamSchema, output.data)
+            if (!success || !stats)
+              return
+            await eventStream.push(`${JSON.stringify({ kind: PayloadKind.Stats, data: stats })}\n`)
           }
         }
       }

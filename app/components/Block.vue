@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import type { Block } from '~~/server/types'
 
-defineProps<{ block: Block, slots: number }>()
+defineProps<{ block: Block }>()
+
+const { policy } = storeToRefs(useStream())
+const slots = computed(() => policy.value?.slots || 0)
 </script>
 
 <template>

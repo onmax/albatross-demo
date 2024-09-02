@@ -2,30 +2,32 @@
 const props = defineProps<{
   blockNumber: number
   batchNumber: number
-  blocksPerBatch: number
-  genesisBlockNumber: number
 }>()
+
+const { policy } = storeToRefs(useStream())
+const genesisBlockNumber = computed(() => policy.value?.genesisBlockNumber || 0)
+const blocksPerBatch = computed(() => policy.value?.blocksPerBatch || 0)
 
 const showColors = ref(false)
 const toggleColors = useToggle(showColors)
 
 const remainingBlockCount = computed(() => {
   if (props.batchNumber === 0)
-    return props.blocksPerBatch - 1
-  const remaining = props.genesisBlockNumber + (props.batchNumber * props.blocksPerBatch) - props.blockNumber - 1
-  return Math.min(Math.max(remaining, 0), props.blocksPerBatch - 1)
+    return blocksPerBatch.value - 1
+  const remaining = genesisBlockNumber.value + (props.batchNumber * blocksPerBatch.value) - props.blockNumber - 1
+  return Math.min(Math.max(remaining, 0), blocksPerBatch.value - 1)
 })
 
 const createdBlockCount = computed(() => {
-  return Math.max(props.blocksPerBatch - remainingBlockCount.value - 1, 0)
+  return Math.max(blocksPerBatch.value - remainingBlockCount.value - 1, 0)
 })
 
 const pastMacro = computed(() => {
-  return props.blockNumber > (props.batchNumber * props.blocksPerBatch) + props.genesisBlockNumber
+  return props.blockNumber > (props.batchNumber * blocksPerBatch.value) + genesisBlockNumber.value
 })
 
 const isWaitingForMacro = computed(() => {
-  return props.blockNumber === (props.batchNumber * props.blocksPerBatch) + props.genesisBlockNumber - 1
+  return props.blockNumber === (props.batchNumber * blocksPerBatch.value) + genesisBlockNumber.value - 1
 })
 
 // @unocss-include
@@ -37,18 +39,18 @@ const batchClass = computed(() => {
   else if (pastMacro.value)
     classes.push('text-neutral-0 op-1')
   else if (props.batchNumber > 999)
-    classes.push('text-7')
+    classes.push('text-9')
   return classes.join(' ')
 })
 
 const batchNumberClass = computed(() => {
   if (props.batchNumber > 99999) {
-    return 'text-5'
+    return 'text-7'
   }
   else if (props.batchNumber > 9999) {
-    return 'text-6'
+    return 'text-8'
   }
-  return 'text-7'
+  return 'text-9'
 })
 </script>
 

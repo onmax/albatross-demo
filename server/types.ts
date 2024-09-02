@@ -35,6 +35,13 @@ export const macroBlockStreamSchema = v.object({
   unmatchedTxs: v.array(v.string()),
 })
 
+export const statsStreamSchema = v.object({
+  duration: v.number(),
+  numberBlocks: v.number(),
+})
+
+export type Stats = v.InferInput<typeof statsStreamSchema>
+
 export type MicroBlockStream = v.InferInput<typeof microBlockStreamSchema>
 export type MacroBlockStream = v.InferInput<typeof macroBlockStreamSchema>
 export type BlockStream = MicroBlockStream | MacroBlockStream
