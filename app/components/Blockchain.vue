@@ -74,6 +74,7 @@ function stopAnimation() {
 }
 
 const isDev = import.meta.dev
+const isDark = useDark()
 </script>
 
 <template>
@@ -81,6 +82,12 @@ const isDev = import.meta.dev
     <h2 mb-6 text-12 font-mono nq-label>
       Dev Panel
     </h2>
+
+    <label mb-12 flex="~ items-center text-10 gap-8">
+      <span text-9 nq-label>Theme</span>
+      <input v-model="isDark" nq-switch type="checkbox">
+    </label>
+
     <div flex="~ items-center gap-8" bg-op-60 capitalize :class="status === StreamStatus.Connected ? 'nq-pill-green' : 'nq-pill-secondary'">
       <div :class="status === StreamStatus.Connected ? 'i-nimiq:world-check' : 'i-nimiq:world-alert'" />
       {{ status }}
