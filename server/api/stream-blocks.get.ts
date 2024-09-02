@@ -34,7 +34,7 @@ export default defineEventHandler(async (event) => {
               const skipBlock = handleSkipBlock(microBlock)
               if (skipBlock)
                 await eventStream.push(`${JSON.stringify(skipBlock)}\n`)
-              await eventStream.push(`${JSON.stringify(parsedMicro)}\n`)
+              await eventStream.push(`${JSON.stringify(microBlock)}\n`)
               return
             }
             const { success: isMacro, output: parsedMacro } = v.safeParse(macroBlockStreamSchema, output.data)
@@ -43,7 +43,7 @@ export default defineEventHandler(async (event) => {
               const skipBlock = handleSkipBlock(macroBlock)
               if (skipBlock)
                 await eventStream.push(`${JSON.stringify(skipBlock)}\n`)
-              await eventStream.push(`${JSON.stringify(parsedMacro)}\n`)
+              await eventStream.push(`${JSON.stringify(macroBlock)}\n`)
             }
             break
           }
