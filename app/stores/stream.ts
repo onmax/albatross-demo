@@ -98,7 +98,7 @@ export const useStream = defineStore('app', () => {
 
   const blockTime = computed(() => {
     const blockTime = duration.value / 1000 / numberBlocks.value
-    return Number(blockTime.toPrecision(2))
+    return roundToSignificant(blockTime, 2)
   })
 
   return {
@@ -114,3 +114,15 @@ export const useStream = defineStore('app', () => {
     policy,
   }
 })
+
+function roundToSignificant(number: number, places = 1) {
+  const roundingFactor = number < 0.01
+    ? 10 ** (2 + places)
+    : number < 0.1
+      ? 10 ** (1 + places)
+      : number < 10
+        ? 10 ** (places)
+        : 1
+
+  return Math.round(number * roundingFactor) / roundingFactor
+}

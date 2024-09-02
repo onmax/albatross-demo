@@ -105,13 +105,6 @@ function stopAnimation() {
         />
       </div>
     </div>
-
-    <div flex="~ items-center wrap justify-between gap-80" ring="1.5 solid neutral-500" mx-auto my-64 w-max rounded-8 px-32 py-20 font-semibold>
-      <Stats flex-1 />
-      <button nq-pill-blue>
-        Send Test Transaction
-      </button>
-    </div>
   </div>
 </template>
 

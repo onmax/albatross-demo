@@ -9,8 +9,10 @@ const props = withDefaults(defineProps<{
 
 const tweeningValue = ref(props.value)
 
-onMounted(() => tween(0, tweeningValue.value))
-watch(tweeningValue, tween)
+onMounted(() => tween(0, tweeningValue.value || 0))
+watch(() => props.value, (newValue) => {
+  tween(tweeningValue.value, newValue)
+})
 
 function tween(startValue: number, endValue: number) {
   if (import.meta.server)
@@ -21,7 +23,7 @@ function tween(startValue: number, endValue: number) {
   function animate() {
     const progress = transition.progress
     const currentValue = transition.currentValue
-    tweeningValue.value = Number(currentValue.toFixed(props.decimals))
+    tweeningValue.value = currentValue
     if (progress < 1) {
       requestAnimationFrame(animate)
     }
@@ -31,5 +33,5 @@ function tween(startValue: number, endValue: number) {
 </script>
 
 <template>
-  <span>{{ tweeningValue }}</span>
+  <span style="font-variant-numeric: normal">{{ tweeningValue.toFixed(decimals) }}</span>
 </template>
