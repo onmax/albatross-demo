@@ -38,6 +38,9 @@ watch(status, (newStatus, oldStatus) => {
     startAnimation()
   }
 }, { immediate: true })
+
+const focused = useWindowFocus()
+
 /*
 Scrolling effect
 
@@ -54,8 +57,11 @@ The velocity is calculated as a root over the distance the element has to travel
 The lower the root (chain speed factor), the slower the element travels and vice-versa.
 */
 function startAnimation() {
-  if (frame.value || status.value !== StreamStatus.Connected)
+  if (frame.value || status.value !== StreamStatus.Connected || !focused.value)
     return
+
+  // eslint-disable-next-line no-console
+  console.log('startAnimation')
 
   function loop() {
     frame.value = requestAnimationFrame(loop)
@@ -69,6 +75,9 @@ function stopAnimation() {
   if (!frame.value)
     return
 
+  // eslint-disable-next-line no-console
+  console.log('stopAnimation')
+
   cancelAnimationFrame(frame.value)
   frame.value = null
 }
@@ -78,20 +87,37 @@ const isDark = useDark()
 </script>
 
 <template>
-  <div v-if="isDev" grid="~ place-content-center" m-16 w-max rounded-8 p-16 border="orange/50 dashed 2">
-    <h2 mb-6 text-12 font-mono nq-label>
-      Dev Panel
-    </h2>
-
-    <label mb-12 flex="~ items-center text-10 gap-8">
-      <span text-9 nq-label>Theme</span>
-      <input v-model="isDark" nq-switch type="checkbox">
-    </label>
-
-    <div flex="~ items-center gap-8" bg-op-60 capitalize :class="status === StreamStatus.Connected ? 'nq-pill-green' : 'nq-pill-secondary'">
-      <div :class="status === StreamStatus.Connected ? 'i-nimiq:world-check' : 'i-nimiq:world-alert'" />
-      {{ status }}
+  <div v-if="isDev" grid="~ place-content-center gap-12" m-16 w-max rounded-8 p-16 bg="orange op-6" border="orange/50 dashed 2" text-11>
+    <div mb-6 flex="~ justify-between items-center">
+      <h2 text-12 font-mono nq-label>
+        Dev Panel
+      </h2>
+      <div flex="~ items-center gap-8" bg-op-60 text-12 capitalize :class="status === StreamStatus.Connected ? 'nq-pill-green' : 'nq-pill-secondary'">
+        <div :class="status === StreamStatus.Connected ? 'i-nimiq:world-check' : 'i-nimiq:world-alert'" />
+        {{ status }}
+      </div>
     </div>
+
+    <div flex="~ items-center gap-32">
+      <label flex="~ items-center text-10 gap-8">
+        <span text-10 nq-label>Theme</span>
+        <input :value="isDark" nq-switch type="checkbox" @change="isDark = !isDark">
+      </label>
+
+      <div flex="~ items-center gap-8" text-12>
+        <span text-10 nq-label>Status</span>
+        <select v-model="status">
+          <option v-for="s in Object.values(StreamStatus)" :key="s" :value="s" capitalize>
+            {{ s }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <p>
+      <span>Animation {{ frame ? '' : 'not' }} running</span>
+    </p>
+
     <details>
       <summary>Policy</summary>
       <pre>{{ policy }}</pre>
@@ -100,11 +126,20 @@ const isDark = useDark()
   <div relative pt-128>
     <div flex="~ justify-end items-center" min-h-224 of-hidden px-24 pr-64>
       <transition-group
-        tag="div" name="block-fade" flex="~ justify-end items-center"
+        tag="div" name="block-fade" flex="~ justify-end items-center" enter-from-class="op-0" enter-active-class="transition-opacity duration-400 ease-in"
         :style="{ transform: `translate3d(${offset}px, 0, 0)` }"
       >
         <Block v-for="block in blocks" :key="`block-${block.blockNumber}`" :block :slots :style="{ width: BLOCK_WIDTH }" />
       </transition-group>
+    </div>
+
+    <div v-if="status !== StreamStatus.Connected || blocks.length === 0" absolute inset-0 flex="~ justify-center items-center" min-h-224 font-bold>
+      <div v-if="status === StreamStatus.Loading || blocks.length === 0" text-18>
+        Loading...
+      </div>
+      <div v-else-if="status === StreamStatus.Error" text="18 white" rounded-4 bg-red px-32 py-24>
+        We couldn't connect to the Demonet
+      </div>
     </div>
 
     <div w-full flex="~ justify-center" of-hidden px-32>
@@ -121,14 +156,6 @@ const isDark = useDark()
 </template>
 
 <style scoped>
-.block-fade-enter-active {
-  transition: opacity 0.4s ease-in;
-}
-
-.block-fade-enter {
-  opacity: 0;
-}
-
 .animate-batch-unshift {
   animation: batch-unshift 0.6s ease-in-out;
 }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const route = useRoute()
-const darkQueryParam = computed(() => route.query.dark === 'true' ? 'dark' : 'light')
+const darkQueryParam = ref<'dark' | 'light'>(route.query.dark === 'false' ? 'light' : 'dark')
 useDark({ initialValue: darkQueryParam })
 </script>
 
