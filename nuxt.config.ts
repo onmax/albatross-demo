@@ -74,6 +74,9 @@ export default defineNuxtConfig({
   watch: ['server/**/*'],
 
   nitro: {
+    experimental: {
+      wasm: true,
+    },
     esbuild: {
       options: {
         target: 'esnext',
