@@ -33,11 +33,20 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    rpcUrl: process.env.NUXT_RPC_URL || '',
-    streamUrl: process.env.NUXT_STREAM_URL || '',
-    public: {
-      nimiqNetwork: process.env.NUXT_PUBLIC_NIMIQ_NETWORK || '',
+    rpcUrl: process.env.NUXT_RPC_URL,
+    albatrossLiveview: {
+      privateKey: process.env.NUXT_ALBATROSS_LIVEVIEW_PRIVATE_KEY,
+      txRecipient: process.env.NUXT_ALBATROSS_LIVEVIEW_TX_RECIPIENT,
+      txValue: process.env.NUXT_ALBATROSS_LIVEVIEW_TX_VALUE,
+      txFee: process.env.NUXT_ALBATROSS_LIVEVIEW_TX_FEE,
     },
+    public: {
+      nimiqNetwork: process.env.NUXT_PUBLIC_NIMIQ_NETWORK,
+    },
+  },
+
+  imports: {
+    dirs: ['server'],
   },
 
   routeRules: {
@@ -75,6 +84,7 @@ export default defineNuxtConfig({
   app: {
     head: {
       viewport: 'width=device-width,initial-scale=1',
+      title: 'Nimiq Albatross Liveview',
       link: [
         { rel: 'icon', href: '/favicon.ico', sizes: 'any' },
         { rel: 'icon', type: 'image/icon', href: '/favicon.ico' },

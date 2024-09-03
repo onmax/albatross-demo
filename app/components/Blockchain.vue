@@ -79,11 +79,15 @@ function stopAnimation() {
   <div relative pt-128>
     <div flex="~ justify-end items-center" min-h-224 of-hidden px-24 pr-64>
       <transition-group
-        tag="div" name="block-fade" flex="~ justify-end items-center" enter-from-class="op-0" enter-active-class="transition-opacity duration-400 ease-in"
+        tag="div" flex="~ justify-end items-center" enter-from-class="op-0" enter-active-class="transition-opacity duration-400 ease-in"
         :style="{ transform: `translate3d(${offset}px, 0, 0)` }"
       >
         <Block v-for="block in blocks" :key="`block-${block.blockNumber}`" :block :style="{ width: BLOCK_WIDTH }" />
       </transition-group>
+
+      <div pl-20>
+        <slot name="pending-tx" />
+      </div>
     </div>
 
     <div v-if="status !== StreamStatus.Connected || blocks.length === 0" absolute inset-0 flex="~ justify-center items-center" min-h-224 font-bold>

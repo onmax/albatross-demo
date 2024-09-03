@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const props = defineProps < { nonces: number[], hashes: string[] } > ()
+const props = defineProps<{ nonces: number[], hashes: string[] }>()
 
 const WIDTH = 320
 const HEIGHT = 240

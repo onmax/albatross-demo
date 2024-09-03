@@ -1,5 +1,6 @@
 import type { PolicyConstants } from 'nimiq-rpc-client-ts'
-import { type Block, type MicroBlock, PayloadKind, type Stats } from '~~/server/types'
+import { PayloadKind } from '~~/server/types'
+import type { BlockLiveview, LiveviewStream, MacroBlockLiveview, MicroBlockLiveview, StatsLiveview } from '~~/server/types'
 
 export enum StreamStatus {
   Idle = 'idle',
@@ -16,8 +17,17 @@ export const useStream = defineStore('app', () => {
   const policy = computed(() => _policy.value as PolicyConstants | undefined)
 
   const status = ref(StreamStatus.Idle)
-  const blocks = ref<Block[]>([])
-  const stats = ref<Stats>({ duration: 0, numberBlocks: 0 })
+
+  const stats = ref<StatsLiveview>({ duration: 0, numberBlocks: 0 })
+
+  const latestBlock = ref<MicroBlockLiveview | MacroBlockLiveview>()
+  const blocks = ref<BlockLiveview[]>([])
+
+  function pushBlock(block: BlockLiveview) {
+    if (block.kind === PayloadKind.MacroBlock || block.kind === PayloadKind.MicroBlock)
+      latestBlock.value = block
+    blocks.value = [...blocks.value, block].slice(-30)
+  }
 
   let alreadyConnected = false
 
@@ -32,29 +42,24 @@ export const useStream = defineStore('app', () => {
     eventSource.addEventListener('error', () => status.value = StreamStatus.Error)
 
     eventSource.onmessage = (event) => {
-      const { kind, data } = JSON.parse(event.data)
-      switch (kind) {
-        case PayloadKind.NewBlock:
-          if (!alreadyConnected) {
-            alreadyConnected = true
-            status.value = StreamStatus.Connected
-          }
-          blocks.value = [...blocks.value, data].slice(-30)
-          break
-        case PayloadKind.CacheComplete:
-          status.value = StreamStatus.Connected
+      if (!alreadyConnected) {
+        status.value = StreamStatus.Connected
+        alreadyConnected = true
+      }
+
+      const json = JSON.parse(event.data) as LiveviewStream
+      switch (json.kind) {
+        case PayloadKind.MicroBlock:
+        case PayloadKind.MacroBlock:
+        case PayloadKind.PlaceholderBlock:
+          pushBlock(json.data as BlockLiveview)
           break
         case PayloadKind.Stats:
-          stats.value = data
+          stats.value = json.data as StatsLiveview
           break
       }
     }
   }
-
-  const latestBlock = computed(() => blocks.value.at(-1))
-  const latestMicroBlock = computed(() => blocks.value.filter(b => b.type === 'micro').at(-1))
-  const blockNumber = computed(() => latestBlock.value?.blockNumber || 0)
-  const batchNumber = computed(() => latestMicroBlock.value?.batchNumber || 0)
 
   const throughput = computed(() => {
     if (blocks.value.length < 3)
@@ -62,15 +67,17 @@ export const useStream = defineStore('app', () => {
     // Blocks in the array might be placeholders, so we split the array at placeholders into segments
     // of length >= 3 and compute throughput individually per segment. The overall throughput is calculated
     // as the segment-length-weighted average of the individual throughput values.
-    const segments = blocks.value.reduce((segments, block) => {
-      if (block.type === 'macro') {
-        segments.push([])
-      }
-      else {
-        segments.at(-1)?.push(block as MicroBlock)
-      }
-      return segments
-    }, [[]] as MicroBlock[][]).filter(segment => segment.length >= 3)
+    const segments = blocks.value
+      .filter(block => block.kind !== PayloadKind.PlaceholderBlock)
+      .reduce((segments, block) => {
+        if (block.kind === PayloadKind.MacroBlock) {
+          segments.push([])
+        }
+        else {
+          segments.at(-1)?.push(block)
+        }
+        return segments
+      }, [[]] as MicroBlockLiveview[][]).filter(segment => segment.length >= 3)
 
     const weightedTxps = segments.reduce((sum, segment) => {
       const txs = segment.reduce((txs, block) => txs + block.matchedTxs.length + block.unmatchedTxs.length, 0)
@@ -105,8 +112,8 @@ export const useStream = defineStore('app', () => {
     status,
     subscribe,
     blocks,
-    blockNumber,
-    batchNumber,
+    blockNumber: computed(() => latestBlock.value?.number || -1),
+    batchNumber: computed(() => latestBlock.value?.batch || -1),
     stats,
     throughput,
     txLimit,

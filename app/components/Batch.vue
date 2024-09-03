@@ -1,8 +1,5 @@
 <script setup lang="ts">
-const props = defineProps<{
-  blockNumber: number
-  batchNumber: number
-}>()
+const props = defineProps<{ blockNumber: number, batchNumber: number }>()
 
 const { policy } = storeToRefs(useStream())
 const genesisBlockNumber = computed(() => policy.value?.genesisBlockNumber || 0)

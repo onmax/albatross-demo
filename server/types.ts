@@ -1,52 +1,35 @@
-import * as v from 'valibot'
+import type { Block, MacroBlock, MicroBlock } from 'nimiq-rpc-client-ts'
 
 export enum PayloadKind {
-  NewBlock = 'newBlock',
-  Policy = 'policy',
+  MicroBlock = 'micro',
+  MacroBlock = 'macro',
+  PlaceholderBlock = 'placeholder',
   Stats = 'stats',
-  CacheComplete = 'cacheComplete',
-  Stale = 'stale',
 }
 
-export const dataPayload = v.object({ kind: v.enum(PayloadKind), data: v.any() })
+export type MicroBlockLiveview = {
+  kind: PayloadKind.MicroBlock
+  delay: number
+  matchedTxs: number[]
+  unmatchedTxs: string[]
+  isSkip: boolean
+} & Pick<MicroBlock, 'producer' | 'number' | 'batch' | 'timestamp'>
 
-export const microBlockStreamSchema = v.object({
-  type: v.literal('micro'),
-  hash: v.string(),
-  blockNumber: v.number(),
-  timestamp: v.number(),
-  batchNumber: v.number(),
-  epochNumber: v.number(),
-  producer: v.object({ index: v.number(), publicKey: v.string(), stakerAddress: v.string() }),
-  matchedTxs: v.array(v.any()),
-  unmatchedTxs: v.array(v.any()),
-  isSkip: v.optional(v.boolean()),
-})
+export type MacroBlockLiveview = {
+  kind: PayloadKind.MacroBlock
+  unmatchedTxs: string[]
+  votes: number
+} & Pick<MacroBlock, 'batch' | 'number'>
 
-export const macroBlockStreamSchema = v.object({
-  type: v.literal('macro'),
-  hash: v.string(),
-  blockNumber: v.number(),
-  timestamp: v.number(),
-  batchNumber: v.number(),
-  epochNumber: v.number(),
-  justification: v.object({ votes: v.number() }),
-  matchedTxs: v.array(v.any()),
-  unmatchedTxs: v.array(v.string()),
-})
+export type PlaceholderBlockLiveview = Pick<Block, 'number' | 'timestamp'> & { kind: PayloadKind.PlaceholderBlock }
 
-export const statsStreamSchema = v.object({
-  duration: v.number(),
-  numberBlocks: v.number(),
-})
+export interface StatsLiveview {
+  kind?: PayloadKind.Stats
+  duration: number
+  numberBlocks: number
+}
 
-export type Stats = v.InferInput<typeof statsStreamSchema>
+export type BlockLiveview = MicroBlockLiveview | MacroBlockLiveview | PlaceholderBlockLiveview
+export type PayloadLiveview = BlockLiveview | StatsLiveview
 
-export type MicroBlockStream = v.InferInput<typeof microBlockStreamSchema>
-export type MacroBlockStream = v.InferInput<typeof macroBlockStreamSchema>
-export type BlockStream = MicroBlockStream | MacroBlockStream
-
-export type MicroBlock = MicroBlockStream & { delay: number, color: string }
-export type MacroBlock = MacroBlockStream & { delay: number, color: string }
-export interface PlaceHolderBlock { type: 'placeholder', blockNumber: number }
-export type Block = MicroBlock | MacroBlock | PlaceHolderBlock
+export interface LiveviewStream<T extends PayloadLiveview = PayloadLiveview> { kind: T['kind'], data: T }

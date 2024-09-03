@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import type { MicroBlock } from '~~/server/types'
-// import TransactionCanvas from '../TransactionCanvas.vue';
+import type { MicroBlockLiveview } from '~~/server/types'
 
-const props = defineProps<{ block: MicroBlock }>()
+const props = defineProps<{ block: MicroBlockLiveview }>()
 
 const MAX_TXS = 1102
 
@@ -19,11 +18,11 @@ const hashes = computed(() => props.block.unmatchedTxs.slice(0, MAX_TXS - nonces
 // @unocss-include
 
 const fontSizeClass = computed(() => {
-  if (props.block.blockNumber > 999999)
+  if (props.block.number > 999999)
     return 'text-15/13.5'
-  if (props.block.blockNumber > 99999)
+  if (props.block.number > 99999)
     return 'text-17'
-  if (props.block.blockNumber > 9999)
+  if (props.block.number > 9999)
     return 'text-20'
   return 'text-24/19'
 })
@@ -34,7 +33,7 @@ const fontSizeClass = computed(() => {
     <div flex="~ col shrink-0" relative size-160 rounded-8 bg-neutral text-neutral-0>
       <div px-16 pb-10 pt-14 flex="~ items-center justify-between" text-15>
         <p font-bold :class="fontSizeClass">
-          #{{ block.blockNumber }}
+          #{{ block.number }}
         </p>
         <p v-if="txCount > 0" text-13 font-semibold lh-none>
           {{ txCount }} TX
@@ -51,7 +50,7 @@ const fontSizeClass = computed(() => {
 
     <footer flex="~ items-center justify-between" w-full px-8 pt-2 text="neutral-800 12">
       <p>
-        Slot {{ block.producer.index }}
+        Slot {{ block.producer.slotNumber }}
       </p>
       <p>
         {{ delay }}s block time

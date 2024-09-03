@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import type { MacroBlock } from '~~/server/types'
+import type { MacroBlockLiveview } from '~~/server/types'
 
-const props = defineProps<{ block: MacroBlock, slots: number }>()
+const props = defineProps<{ block: MacroBlockLiveview, slots: number }>()
 
 const requiredVotes = computed(() => Math.ceil(props.slots * 2 / 3))
-const progress = computed(() => Math.min(props.block.justification.votes / requiredVotes.value, 1))
+const progress = computed(() => Math.min(props.block.votes / requiredVotes.value, 1))
 </script>
 
 <template>
@@ -14,7 +14,7 @@ const progress = computed(() => Math.min(props.block.justification.votes / requi
     </header>
 
     <div text-24 font-bold lh-none>
-      M{{ block.batchNumber }}
+      M{{ block.batch }}
     </div>
 
     <RadialProgress
@@ -23,7 +23,7 @@ const progress = computed(() => Math.min(props.block.justification.votes / requi
     />
 
     <div mb-16 text-24>
-      {{ block.justification.votes }} / {{ slots }}
+      {{ block.votes }} / {{ slots }}
       <div text-12 lh-none>
         Votes
       </div>
