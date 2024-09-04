@@ -1,16 +1,18 @@
 <script setup lang="ts">
-const { status, blockNumber } = storeToRefs(useStream())
+const { blockNumber } = storeToRefs(useBlocks())
+const { status: statsStatus } = storeToRefs(useStats())
 
 const getNonce = () => Math.round(Math.random() * (2 ** 32 - 1))
 const nonce = ref<number>(getNonce())
 
-const body = computed(() => ({ nonce, validityStartHeight: blockNumber }))
-const { status: statusSendTx, refresh: sendTx, clear } = await useFetch('/api/send-tx', { method: 'POST', body, immediate: false, watch: false })
+const { status: statusSendTx, refresh: sendTx, clear, error } = await useFetch('/api/send-tx', { method: 'POST', body: { nonce, validityStartHeight: blockNumber }, immediate: false, watch: false })
 
 setTimeout(() => {
   nonce.value = getNonce()
   clear()
 }, 50)
+
+const pillClass = computed(() => getPillColor({ nonce: nonce.value }))
 </script>
 
 <template>
@@ -23,7 +25,7 @@ setTimeout(() => {
         <div v-if="statusSendTx === 'error'" flex="~ items-center justify-center col shrink-0" relative w-72>
           <i i-nimiq:cross text="12 red" />
           <span text="13/17 center red" mt-12 font-semibold transition-opacity duration-400 ease-in>
-            Error sending transaction
+            Error sending transaction. {{ error }}
           </span>
         </div>
         <div v-else-if="statusSendTx === 'pending' && nonce" flex="~ items-center justify-center col shrink-0" relative w-72>
@@ -38,9 +40,9 @@ setTimeout(() => {
       </transition>
     </template>
   </Blockchain>
-  <div v-if="status === StreamStatus.Connected" flex="~ items-center justify-center gap-x-80 gap-y-32 col md:row" ring="1.5 solid neutral-500" mx="32 md:auto" my-64 max-w-712 rounded-8 px-32 py-20 font-semibold>
+  <div v-if="statsStatus === 'OPEN'" flex="~ items-center justify-center gap-x-80 gap-y-32 col md:row" ring="1.5 solid neutral-500" mx="32 md:auto" my-64 max-w-712 rounded-8 px-32 py-20 font-semibold>
     <Stats flex-1 />
-    <button :disabled="statusSendTx !== 'idle' && statusSendTx !== 'success'" select-none nq-pill-blue @click="() => sendTx()">
+    <button :disabled="statusSendTx !== 'idle' && statusSendTx !== 'success'" select-none :class="pillClass" @click="() => sendTx()">
       Send Test Transaction
     </button>
   </div>

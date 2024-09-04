@@ -45,10 +45,6 @@ export default defineNuxtConfig({
     },
   },
 
-  imports: {
-    dirs: ['server'],
-  },
-
   routeRules: {
     '/api/policy': { swr: 3600 }, // cache 1 hour
   },

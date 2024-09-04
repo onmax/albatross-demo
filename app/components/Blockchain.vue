@@ -8,16 +8,13 @@ const TARGET_OFFSET = -BLOCK_WIDTH / 4
 // A factor of 0.55-0.65 works well for block times of ~0.2s.
 const CHAIN_SPEED_FACTOR = 0.6
 
-const { subscribe } = useStream()
-const { blocks, batchNumber, blockNumber, status } = storeToRefs(useStream())
-
-subscribe()
+const { blocks, batchNumber, blockNumber, status } = storeToRefs(useBlocks())
 
 const frame = ref<number | null>(null)
 const velocity = ref(0)
 const offset = ref(blocks.value.length * BLOCK_WIDTH)
 watch(blocks, () => {
-  if (status.value === StreamStatus.Connected)
+  if (status.value === 'OPEN')
     offset.value += BLOCK_WIDTH
 })
 
@@ -25,8 +22,8 @@ onUnmounted(() => {
   stopAnimation()
 })
 
-watch(status, (newStatus, oldStatus) => {
-  if (newStatus === StreamStatus.Connected && oldStatus === StreamStatus.Syncing) {
+watch(status, (newStatus) => {
+  if (newStatus === 'OPEN') {
     startAnimation()
   }
 }, { immediate: true })
@@ -49,7 +46,7 @@ The velocity is calculated as a root over the distance the element has to travel
 The lower the root (chain speed factor), the slower the element travels and vice-versa.
 */
 function startAnimation() {
-  if (frame.value || status.value !== StreamStatus.Connected || !focused.value)
+  if (frame.value || status.value !== 'OPEN' || !focused.value)
     return
 
   // eslint-disable-next-line no-console
@@ -90,11 +87,11 @@ function stopAnimation() {
       </div>
     </div>
 
-    <div v-if="status !== StreamStatus.Connected || blocks.length === 0" absolute inset-0 flex="~ justify-center items-center" min-h-224 font-bold>
-      <div v-if="status === StreamStatus.Loading || blocks.length === 0" text-18>
+    <div v-if="status !== 'OPEN' || blocks.length === 0" absolute inset-0 flex="~ justify-center items-center" min-h-224 font-bold>
+      <div v-if="status === 'CONNECTING' || blocks.length === 0" text-18>
         Loading...
       </div>
-      <div v-else-if="status === StreamStatus.Error" text="18 white" rounded-4 bg-red px-32 py-24>
+      <div v-else-if="status === 'CLOSED'" text="18 white" rounded-4 bg-red px-32 py-24>
         We couldn't connect to the Demonet
       </div>
     </div>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-const { policy, status, stats } = storeToRefs(useStream())
+const { status: statsStatus, stats } = storeToRefs(useStats())
+const { status: blocksStatus } = storeToRefs(useBlocks())
 const isDark = useDark()
 </script>
 
@@ -9,9 +10,13 @@ const isDark = useDark()
       <h2 text-12 font-mono nq-label>
         Dev Panel
       </h2>
-      <div flex="~ items-center gap-8" bg-op-60 text-12 capitalize :class="status === StreamStatus.Connected ? 'nq-pill-green' : 'nq-pill-secondary'">
-        <div :class="status === StreamStatus.Connected ? 'i-nimiq:world-check' : 'i-nimiq:world-alert'" />
-        {{ status }}
+      <div flex="~ items-center gap-8" bg-op-60 text-12 capitalize :class="statsStatus === 'OPEN' ? 'nq-pill-green' : 'nq-pill-secondary'">
+        <div :class="statsStatus === 'OPEN' ? 'i-nimiq:world-check' : 'i-nimiq:world-alert'" />
+        Stats
+      </div>
+      <div flex="~ items-center gap-8" bg-op-60 text-12 capitalize :class="blocksStatus === 'OPEN' ? 'nq-pill-green' : 'nq-pill-secondary'">
+        <div :class="blocksStatus === 'OPEN' ? 'i-nimiq:world-check' : 'i-nimiq:world-alert'" />
+        Blocks
       </div>
     </div>
 
@@ -26,25 +31,9 @@ const isDark = useDark()
       </div>
     </div>
 
-    <div flex="~ items-center gap-32">
-      <label flex="~ items-center text-10 gap-8">
-        <span text-10 nq-label>Theme</span>
-        <input :value="isDark" nq-switch type="checkbox" @change="isDark = !isDark">
-      </label>
-
-      <div flex="~ items-center gap-8" text-12>
-        <span text-10 nq-label>Status</span>
-        <select v-model="status">
-          <option v-for="s in Object.values(StreamStatus)" :key="s" :value="s" capitalize>
-            {{ s }}
-          </option>
-        </select>
-      </div>
-    </div>
-
-    <details>
-      <summary>Policy</summary>
-      <pre>{{ policy }}</pre>
-    </details>
+    <label flex="~ items-center text-10 gap-8">
+      <span text-10 nq-label>Theme</span>
+      <input :value="isDark" nq-switch type="checkbox" @change="isDark = !isDark">
+    </label>
   </div>
 </template>

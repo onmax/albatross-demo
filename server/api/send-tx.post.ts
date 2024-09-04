@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: JSON.stringify(issues) })
 
   const { albatrossLiveview, rpcUrl } = useRuntimeConfig()
-  const client = new NimiqRPCClient(new URL(rpcUrl))
+  const client = new NimiqRPCClient(rpcUrl)
 
   const { privateKey } = albatrossLiveview
   const keyPair = KeyPair.derive(PrivateKey.fromHex(privateKey))

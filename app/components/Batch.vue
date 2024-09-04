@@ -1,31 +1,25 @@
 <script setup lang="ts">
+import type { PolicyConstants } from 'nimiq-rpc-client-ts'
+
 const props = defineProps<{ blockNumber: number, batchNumber: number }>()
 
-const { policy } = storeToRefs(useStream())
-const genesisBlockNumber = computed(() => policy.value?.genesisBlockNumber || 0)
-const blocksPerBatch = computed(() => policy.value?.blocksPerBatch || 0)
+const { data: policy } = useFetch<PolicyConstants>('/api/policy')
+const genesisBlockNumber = policy.value?.genesisBlockNumber || 0
+const blocksPerBatch = policy.value?.blocksPerBatch || 0
 
 const showColors = ref(false)
 const toggleColors = useToggle(showColors)
 
 const remainingBlockCount = computed(() => {
   if (props.batchNumber === 0)
-    return blocksPerBatch.value - 1
-  const remaining = genesisBlockNumber.value + (props.batchNumber * blocksPerBatch.value) - props.blockNumber - 1
-  return Math.min(Math.max(remaining, 0), blocksPerBatch.value - 1)
+    return blocksPerBatch - 1
+  const remaining = genesisBlockNumber + (props.batchNumber * blocksPerBatch) - props.blockNumber - 1
+  return Math.min(Math.max(remaining, 0), blocksPerBatch - 1)
 })
 
-const createdBlockCount = computed(() => {
-  return Math.max(blocksPerBatch.value - remainingBlockCount.value - 1, 0)
-})
-
-const pastMacro = computed(() => {
-  return props.blockNumber > (props.batchNumber * blocksPerBatch.value) + genesisBlockNumber.value
-})
-
-const isWaitingForMacro = computed(() => {
-  return props.blockNumber === (props.batchNumber * blocksPerBatch.value) + genesisBlockNumber.value - 1
-})
+const createdBlockCount = computed(() => Math.max(blocksPerBatch - remainingBlockCount.value - 1, 0))
+const pastMacro = computed(() => props.blockNumber > (props.batchNumber * blocksPerBatch) + genesisBlockNumber)
+const isWaitingForMacro = computed(() => props.blockNumber === (props.batchNumber * blocksPerBatch) + genesisBlockNumber - 1)
 
 // @unocss-include
 
