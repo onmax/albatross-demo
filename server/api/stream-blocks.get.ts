@@ -1,10 +1,12 @@
-import { type Block, NimiqRPCClient } from 'nimiq-rpc-client-ts'
+import type { Block, MacroBlock, MicroBlock } from 'nimiq-rpc-client-ts'
+import { NimiqRPCClient } from 'nimiq-rpc-client-ts'
 import { ref, watch } from 'vue'
 import type { LiveviewStream, PayloadLiveview, PlaceholderBlockLiveview } from '../types'
 import { PayloadKind } from '../types'
 
 const STATS_WINDOW_SIZE = 3 * 128
 const STATS_REFRESH_EVERY = 5
+const INITIAK_BLOCK_FETCH = 16
 
 let placeholderCounter = -1
 let lastCalculatedDelay = 0
@@ -21,6 +23,30 @@ export default defineEventHandler(async (event) => {
 
   const client = new NimiqRPCClient(new URL(rpcUrl))
 
+  // Fetch the latest 16 blocks
+  const { data: head, error: headError } = await client.blockchain.getBlockNumber()
+  if (!head || headError) {
+    console.error(`Error fetching head block: ${JSON.stringify(headError)}`)
+    return
+  }
+
+  const latestBlockNumber = head
+  for (let i = 0; i < INITIAK_BLOCK_FETCH; i++) {
+    const blockNumber = latestBlockNumber - i
+    const { data: block, error: blockError } = await client.blockchain.getBlockByNumber(blockNumber)
+    if (!block || blockError) {
+      await sendPayload({ kind: PayloadKind.PlaceholderBlock, number: blockNumber, timestamp: Date.now() })
+      continue
+    }
+    if (block.type === 'micro')
+      await sendMicroblock(block as MicroBlock)
+    else if (block.type === 'macro')
+      await sendMacroblock(block as MacroBlock)
+
+    latestBlock.value = block as Block
+  }
+
+  // Subscribe to microblocks
   const { next: nextMicroblock } = await client.blockchainStreams.subscribeForMicroBlocks()
   nextMicroblock(async ({ error, data: block }) => {
     if (error?.code || !block) {
@@ -28,22 +54,15 @@ export default defineEventHandler(async (event) => {
       return
     }
 
-    const delay = calculateDelay(latestBlock.value, block)
-
     const placeholder = await lock(() => handleBlock(latestBlock.value, block))
     if (placeholder)
       sendPayload(placeholder)
+    sendMicroblock(block)
 
-    const { producer, justification, transactions, number, batch, timestamp } = block
-    const isSkip = 'skip' in justification
-    const matchedTxs = transactions.filter(tx => tx.to.length === 8).map(tx => Number.parseInt(tx.to, 16))
-    const unmatchedTxs = transactions.filter(tx => tx.to.length !== 8).map(tx => tx.hash.substring(0, 8))
-    const kind = PayloadKind.MicroBlock
-
-    sendPayload({ producer, isSkip, matchedTxs, unmatchedTxs, delay, kind, number, batch, timestamp })
     latestBlock.value = placeholder ? undefined : block
   })
 
+  // Subscribe to macroblocks
   const { next: nextMacroblock } = await client.blockchainStreams.subscribeForMacroBlocks()
   nextMacroblock(async ({ error, data: block }) => {
     if (error?.code || !block) {
@@ -52,18 +71,31 @@ export default defineEventHandler(async (event) => {
     }
 
     const placeholder = await lock(() => handleBlock(latestBlock.value, block))
-    if (placeholder) {
+    if (placeholder)
       sendPayload(placeholder)
-    }
+    sendMacroblock(block)
 
+    latestBlock.value = placeholder ? undefined : block
+  })
+
+  async function sendMicroblock(block: MicroBlock) {
+    const { producer, justification, transactions, number, batch, timestamp } = block
+    const isSkip = 'skip' in justification
+    const matchedTxs = transactions.filter(tx => tx.to.length === 8).map(tx => Number.parseInt(tx.to, 16))
+    const unmatchedTxs = transactions.filter(tx => tx.to.length !== 8).map(tx => tx.hash.substring(0, 8))
+    const kind = PayloadKind.MicroBlock
+    const delay = latestBlock.value ? block.timestamp - latestBlock.value.timestamp : lastCalculatedDelay
+    lastCalculatedDelay = delay
+    sendPayload({ producer, isSkip, matchedTxs, unmatchedTxs, delay, kind, number, batch, timestamp })
+  }
+
+  async function sendMacroblock(block: MacroBlock) {
     const { transactions, justification, batch, number } = block
     const unmatchedTxs = transactions.map(tx => tx.hash.substring(0, 8))
     const votes = justification.sig.signers.length
     const kind = PayloadKind.MacroBlock
-
     sendPayload({ unmatchedTxs, votes, batch, kind, number })
-    latestBlock.value = placeholder ? undefined : block
-  })
+  }
 
   async function sendStats(lastBlock: Pick<Block, 'number' | 'timestamp'>) {
     const firstBlock = Math.max(1, lastBlock.number - STATS_WINDOW_SIZE)
@@ -78,11 +110,6 @@ export default defineEventHandler(async (event) => {
     sendPayload({ duration, numberBlocks, kind })
   }
 
-  const { data: head, error } = await client.blockchain.getBlockNumber()
-  if (!head || error) {
-    console.error(`Error fetching head block: ${JSON.stringify(error)}`)
-    return
-  }
   sendStats({ number: head, timestamp: Date.now() })
 
   watch(latestBlock, async (lastBlock) => {
@@ -131,13 +158,4 @@ async function lock<T>(callback: () => T) {
 
   await lockPromise()
   return res!
-}
-
-function calculateDelay(oldBlock: Block | PlaceholderBlockLiveview | undefined, newBlock: Block): number {
-  if (!oldBlock) {
-    return lastCalculatedDelay // Return the previous delay if lastBlockTimestamp was undefined
-  }
-  const delay = newBlock.timestamp - oldBlock.timestamp
-  lastCalculatedDelay = delay // Store the current delay for future use
-  return delay
 }

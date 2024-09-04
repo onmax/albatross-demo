@@ -82,7 +82,7 @@ function stopAnimation() {
         tag="div" flex="~ justify-end items-center" enter-from-class="op-0" enter-active-class="transition-opacity duration-400 ease-in"
         :style="{ transform: `translate3d(${offset}px, 0, 0)` }"
       >
-        <Block v-for="block in blocks" :key="`block-${block.blockNumber}`" :block :style="{ width: BLOCK_WIDTH }" />
+        <Block v-for="block in blocks" :key="`block-${block.number}`" :block :style="{ width: BLOCK_WIDTH }" />
       </transition-group>
 
       <div pl-20>

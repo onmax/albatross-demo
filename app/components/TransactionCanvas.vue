@@ -3,7 +3,7 @@ const props = defineProps<{ nonces: number[], hashes: string[] }>()
 
 const WIDTH = 320
 const HEIGHT = 240
-const COLORCODES = ['#0582CA', '#E9B213', '#21BCA5', '#FC8702', '#D94432', '#5F4B8B', '#FA7268', '#88B04B']
+// const COLORCODES = ['#0582CA', '#E9B213', '#21BCA5', '#FC8702', '#D94432', '#5F4B8B', '#FA7268', '#88B04B']
 const CIRCUMFERENCE = 2 * Math.PI
 
 const canvas = ref < HTMLCanvasElement > ()
@@ -41,7 +41,8 @@ onMounted(() => {
   for (const nonce of props.nonces) {
     ctx.beginPath()
     ctx.arc(x, y, radius, 0, CIRCUMFERENCE)
-    ctx.fillStyle = COLORCODES[nonce % COLORCODES.length]!
+    // ctx.fillStyle = COLORCODES[nonce % COLORCODES.length]!
+    ctx.fillStyle = getVarColor({ nonce })
     ctx.fill()
 
     y -= step // Go one step up
@@ -55,7 +56,8 @@ onMounted(() => {
   for (const hash of props.hashes) {
     ctx.beginPath()
     ctx.arc(x, y, radius, 0, CIRCUMFERENCE)
-    ctx.fillStyle = COLORCODES[Number.parseInt(hash.substring(0, 8), 16) % COLORCODES.length]!
+    // ctx.fillStyle = COLORCODES[Number.parseInt(hash.substring(0, 8), 16) % COLORCODES.length]!
+    ctx.fillStyle = getVarColor({ hash })
     ctx.fill()
 
     y -= step // Go one step up

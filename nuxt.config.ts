@@ -67,7 +67,7 @@ export default defineNuxtConfig({
       topLevelAwait(),
     ],
     optimizeDeps: {
-      exclude: ['@nimiq/core'],
+      exclude: ['@nimiq/core', '*.wasm'],
     },
   },
 
