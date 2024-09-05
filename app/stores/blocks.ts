@@ -30,5 +30,6 @@ export const useBlocks = defineStore('blocks', () => {
     blocks,
     blockNumber: computed(() => latestBlock.value?.number || -1),
     batchNumber: computed(() => latestBlock.value?.batch || -1),
+    matchedTxs: computed(() => blocks.value.filter(block => block.kind === BlockLiveviewType.MicroBlock).map(block => block.matchedTxs).flat()),
   }
 })

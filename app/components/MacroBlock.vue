@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import type { PolicyConstants } from 'nimiq-rpc-client-ts'
 import type { MacroBlockLiveview } from '~~/server/types'
 
 const props = defineProps<{ block: MacroBlockLiveview }>()
-const { data: policy } = useFetch<PolicyConstants>('/api/policy')
-const slots = computed(() => policy.value!.slots)
+const { policy } = storeToRefs(usePolicy())
+const slots = computed(() => policy.value?.slots || 512)
 const requiredVotes = computed(() => Math.ceil(slots.value * 2 / 3))
 const progress = computed(() => Math.min(props.block.votes / requiredVotes.value, 1))
 </script>

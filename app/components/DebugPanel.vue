@@ -10,11 +10,11 @@ const isDark = useDark()
       <h2 text-12 font-mono nq-label>
         Dev Panel
       </h2>
-      <div flex="~ items-center gap-8" bg-op-60 text-12 capitalize :class="statsStatus === 'OPEN' ? 'nq-pill-green' : 'nq-pill-secondary'">
+      <div flex="~ items-center gap-8" :class="statsStatus === 'OPEN' ? 'nq-pill-green' : 'nq-pill-secondary'" ml-32 bg-op-60 text-12 capitalize>
         <div :class="statsStatus === 'OPEN' ? 'i-nimiq:world-check' : 'i-nimiq:world-alert'" />
         Stats
       </div>
-      <div flex="~ items-center gap-8" bg-op-60 text-12 capitalize :class="blocksStatus === 'OPEN' ? 'nq-pill-green' : 'nq-pill-secondary'">
+      <div flex="~ items-center gap-8" :class="blocksStatus === 'OPEN' ? 'nq-pill-green' : 'nq-pill-secondary'" ml-12 bg-op-60 text-12 capitalize>
         <div :class="blocksStatus === 'OPEN' ? 'i-nimiq:world-check' : 'i-nimiq:world-alert'" />
         Blocks
       </div>
@@ -33,7 +33,7 @@ const isDark = useDark()
 
     <label flex="~ items-center text-10 gap-8">
       <span text-10 nq-label>Theme</span>
-      <input :value="isDark" nq-switch type="checkbox" @change="isDark = !isDark">
+      <input v-model="isDark" nq-switch type="checkbox">
     </label>
   </div>
 </template>

@@ -24,14 +24,14 @@ const colorsPill: Record<Color, string> = {
   green: 'nq-pill-green',
 }
 
-const colorsVar: Record<Color, string> = {
-  blue: 'rgb(var(--nq-blue))',
-  gold: 'rgb(var(--nq-gold))',
-  orange: 'rgb(var(--nq-orange))',
-  red: 'rgb(var(--nq-red))',
-  purple: 'rgb(var(--nq-purple))',
+const colorsValues: Record<Color, string> = {
+  blue: '#0582CA',
+  gold: '#E9B213',
+  orange: '#FC8702',
+  red: '#d94432',
+  purple: '#5F4B8B',
   pink: '#FA7268',
-  green: 'rgb(var(--nq-green))',
+  green: '#21BCA5',
 }
 
 type Arg = { hash: string } | { nonce: number }
@@ -47,4 +47,4 @@ function getColor(options: Arg) {
 
 export const getBgColor = (options: Arg) => colorsBg[getColor(options)]
 export const getPillColor = (options: Arg) => colorsPill[getColor(options)]
-export const getVarColor = (options: Arg) => colorsVar[getColor(options)]
+export const getColorValue = (options: Arg) => colorsValues[getColor(options)]

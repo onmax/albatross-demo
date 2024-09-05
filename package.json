@@ -15,14 +15,14 @@
   "dependencies": {
     "@nimiq/core": "next",
     "@nimiq/utils": "^0.11.3",
-    "nimiq-rpc-client-ts": "https://pkg.pr.new/onmax/albatross-rpc-client-ts/nimiq-rpc-client-ts@69aa7f2",
-    "valibot": "^0.40.0"
+    "nimiq-rpc-client-ts": "https://pkg.pr.new/onmax/albatross-rpc-client-ts/nimiq-rpc-client-ts@7618575",
+    "valibot": "^0.41.0"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^3.0.0",
-    "@nuxt/eslint": "^0.5.4",
+    "@antfu/eslint-config": "^3.2.0",
+    "@nuxt/eslint": "^0.5.5",
     "@nuxt/image": "^1.8.0",
-    "@nuxthub/core": "^0.7.8",
+    "@nuxthub/core": "^0.7.9",
     "@nuxtjs/color-mode": "^3.4.4",
     "@pinia/nuxt": "^0.5.4",
     "@unocss/eslint-plugin": "^0.62.3",
@@ -33,18 +33,18 @@
     "@vueuse/nuxt": "^11.0.3",
     "eslint": "^9.9.1",
     "eslint-plugin-format": "^0.1.2",
-    "lint-staged": "^15.2.9",
+    "lint-staged": "^15.2.10",
     "nimiq-css": "^0.1.11",
-    "nuxt": "^3.13.0",
+    "nuxt": "^3.13.1",
     "pinia": "^2.2.2",
     "simple-git-hooks": "^2.11.1",
     "typescript": "^5.5.4",
     "vite-plugin-top-level-await": "^1.4.4",
     "vite-plugin-wasm": "^3.3.0",
-    "wrangler": "^3.73.0"
+    "wrangler": "^3.74.0"
   },
   "resolutions": {
-    "@typescript-eslint/utils": "^8.3.0"
+    "@typescript-eslint/utils": "^8.4.0"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm lint-staged"

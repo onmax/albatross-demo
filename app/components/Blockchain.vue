@@ -14,9 +14,10 @@ const frame = ref<number | null>(null)
 const velocity = ref(0)
 const offset = ref(blocks.value.length * BLOCK_WIDTH)
 watch(blocks, () => {
-  if (status.value === 'OPEN')
-    offset.value += BLOCK_WIDTH
-})
+  if (status.value !== 'OPEN')
+    return
+  offset.value += BLOCK_WIDTH
+}, { deep: true })
 
 onUnmounted(() => {
   stopAnimation()
@@ -74,7 +75,7 @@ function stopAnimation() {
 
 <template>
   <div relative pt-128>
-    <div flex="~ justify-end items-center" min-h-224 of-hidden px-24 pr-64>
+    <div flex="~ justify-end items-center" min-h-224 of-hidden px-24 pr-84>
       <transition-group
         tag="div" flex="~ justify-end items-center" enter-from-class="op-0" enter-active-class="transition-opacity duration-400 ease-in"
         :style="{ transform: `translate3d(${offset}px, 0, 0)` }"
@@ -82,7 +83,7 @@ function stopAnimation() {
         <Block v-for="block in blocks" :key="`block-${block.number}`" :block :style="{ width: BLOCK_WIDTH }" />
       </transition-group>
 
-      <div pl-20>
+      <div absolute right-32>
         <slot name="pending-tx" />
       </div>
     </div>
@@ -96,14 +97,10 @@ function stopAnimation() {
       </div>
     </div>
 
-    <div w-full flex="~ justify-center" of-hidden px-32>
+    <div v-show="status === 'OPEN'" w-full flex="~ justify-center" of-hidden px-32>
       <!-- :class="{ unimate: isMacro || isFirstBatchAfterPageLoad }"> -->
       <div flex="~ justify-center">
-        <Batch
-          v-for="n in 7" :key="`batch-${batchNumber - 3 + n - 1}`"
-          :block-number :batch-number="batchNumber - 3 + n - 1"
-          mt-64 shrink-0 class="animate-batch-unshift"
-        />
+        <Batch v-for="n in 7" :key="`batch-${batchNumber - 3 + n - 1}`" :batch-number="batchNumber - 3 + n - 1" :block-number mt-64 shrink-0 class="animate-batch-unshift" />
       </div>
     </div>
   </div>

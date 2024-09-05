@@ -42,7 +42,7 @@ onMounted(() => {
     ctx.beginPath()
     ctx.arc(x, y, radius, 0, CIRCUMFERENCE)
     // ctx.fillStyle = COLORCODES[nonce % COLORCODES.length]!
-    ctx.fillStyle = getVarColor({ nonce })
+    ctx.fillStyle = getColorValue({ nonce })
     ctx.fill()
 
     y -= step // Go one step up
@@ -57,7 +57,7 @@ onMounted(() => {
     ctx.beginPath()
     ctx.arc(x, y, radius, 0, CIRCUMFERENCE)
     // ctx.fillStyle = COLORCODES[Number.parseInt(hash.substring(0, 8), 16) % COLORCODES.length]!
-    ctx.fillStyle = getVarColor({ hash })
+    ctx.fillStyle = getColorValue({ hash })
     ctx.fill()
 
     y -= step // Go one step up

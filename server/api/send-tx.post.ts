@@ -25,14 +25,15 @@ export default defineEventHandler(async (event) => {
 
   const tx = TransactionBuilder.newBasicWithData(keyPair.toAddress(), recipient, data, value, fee, validityStartHeight, 5)
   tx.sign(keyPair)
+  const txHash = tx.hash()
 
-  const { data: txHash, error } = await client.consensus.sendRawTransaction({ rawTransaction: tx.toHex() })
-  if (error) {
-    console.error('Failed to send transaction', error)
+  const { error } = await client.consensus.sendRawTransaction({ rawTransaction: tx.toHex() })
+  if (error)
     throw createError({ statusCode: 400, statusMessage: JSON.stringify(error) })
-  }
+
   // eslint-disable-next-line no-console
   console.log(`Transaction sent: ${txHash}`)
   setResponseStatus(event, 201)
+
   return { txHash }
 })
