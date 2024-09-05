@@ -8,6 +8,7 @@ const CACHE_SIZE = 100
 const blockCache = new Map<number, Block>()
 
 export default defineEventHandler(async (event) => {
+  blockCache.clear()
   const eventStream = createEventStream(event)
   handleStream(eventStream)
   return eventStream.send()
@@ -66,12 +67,13 @@ async function handleStream(eventStream: ReturnType<typeof createEventStream>) {
 
   // Fetch initial blocks
   const { data: head } = await client.blockchain.getBlockNumber()
-  if (head) {
-    const blocks = await fetchAndCacheBlocks(head, INITIAL_BLOCK_FETCH)
-    for (const { block } of blocks) {
-      if (block)
-        await processBlock(block)
-    }
+  if (!head)
+    throw createError({ status: 500, message: 'Failed to get block number' })
+
+  const blocks = await fetchAndCacheBlocks(head, INITIAL_BLOCK_FETCH)
+  for (const { block } of blocks) {
+    if (block)
+      await processBlock(block)
   }
 
   // Subscribe to new blocks

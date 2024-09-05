@@ -11,7 +11,7 @@ const CHAIN_SPEED_FACTOR = 0.6
 const { blocks, batchNumber, blockNumber, status } = storeToRefs(useBlocks())
 
 const frame = ref<number | null>(null)
-const velocity = ref(0)
+const velocity = ref(1000000)
 const offset = ref(blocks.value.length * BLOCK_WIDTH)
 watch(blocks, () => {
   if (status.value !== 'OPEN')
@@ -19,17 +19,23 @@ watch(blocks, () => {
   offset.value += BLOCK_WIDTH
 }, { deep: true })
 
-onUnmounted(() => {
-  stopAnimation()
-})
+onUnmounted(() => stopAnimation())
 
-watch(status, (newStatus) => {
+watch(status, async (newStatus) => {
+  await nextTick()
   if (newStatus === 'OPEN') {
     startAnimation()
   }
 }, { immediate: true })
 
 const focused = useWindowFocus()
+
+watchWithFilter(focused, () => {
+  if (focused.value)
+    startAnimation()
+  else
+    stopAnimation()
+}, { immediate: true })
 
 /*
 Scrolling effect
@@ -47,13 +53,15 @@ The velocity is calculated as a root over the distance the element has to travel
 The lower the root (chain speed factor), the slower the element travels and vice-versa.
 */
 function startAnimation() {
-  if (frame.value || status.value !== 'OPEN' || !focused.value)
+  if (frame.value || status.value !== 'OPEN')
     return
 
   // eslint-disable-next-line no-console
   console.log('startAnimation')
 
   function loop() {
+    if (!focused.value)
+      return
     frame.value = requestAnimationFrame(loop)
     velocity.value = -Math.floor((-TARGET_OFFSET + offset.value) ** CHAIN_SPEED_FACTOR)
     offset.value += velocity.value
